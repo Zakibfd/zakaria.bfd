@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنجاز البحوث والمذكرات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: #ffd700;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .service-header {
+            background: linear-gradient(135deg, #4a6491, #2c3e50);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .service-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .service-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .service-body {
+            padding: 25px;
+        }
+        
+        .service-price {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .service-desc {
+            color: #666;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #4a6491;
+        }
+        
+        .contact-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        
+        .contact-info a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .services {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>إنجاز البحوث والمذكرات
+            </div>
+            <h1>خدمات أكاديمية متكاملة بجودة عالية</h1>
+            <p class="tagline">نقدم لك يد العون في رحلتك الأكاديمية بخدمات احترافية تلبي جميع احتياجاتك</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="services">
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3 class="service-title">إنجاز المذكرات</h3>
+                </div>
+                <div class="service-body">
+                    <p class="service-desc">خدمة متكاملة لإعداد وتجهيز المذكرات الأكاديمية وفق أعلى المعايير العلمية وبشكل احترافي</p>
+                    <div class="service-price">ابتداء من 80 دينار للورقة</div>
+                    <button class="btn order-btn" data-service="إنجاز المذكرات">طلب الخدمة</button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="fas fa-pen-fancy"></i>
+                    </div>
+                    <h3 class="service-title">الكتابة الأكاديمية</h3>
+                </div>
+                <div class="service-body">
+                    <p class="service-desc">خدمة الكتابة الأكاديمية بمختلف أنواعها وأشكالها مع الالتزام بمعايير الجودة والمنهجية العلمية</p>
+                    <div class="service-price">ابتداء من 40 دينار للورقة</div>
+                    <button class="btn order-btn" data-service="الكتابة الأكاديمية">طلب الخدمة</button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="service-title">إنجاز البحوث</h3>
+                </div>
+                <div class="service-body">
+                    <p class="service-desc">إعداد البحوث العلمية المتكاملة بمنهجية دقيقة وجودة عالية مع المراجع والتوثيق العلمي</p>
+                    <div class="service-price">500 دينار</div>
+                    <button class="btn order-btn" data-service="إنجاز البحوث">طلب الخدمة</button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="fas fa-spell-check"></i>
+                    </div>
+                    <h3 class="service-title">التصحيح والتدقيق</h3>
+                </div>
+                <div class="service-body">
+                    <p class="service-desc">خدمة تدقيق لغوي ونحوي متكاملة مع مراعاة المنهجية العلمية وتصحيح الأخطاء الإملائية والنحوية</p>
+                    <div class="service-price">30 دينار</div>
+                    <button class="btn order-btn" data-service="التصحيح والتدقيق">طلب الخدمة</button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3 class="service-title">الترجمة الأكاديمية</h3>
+                </div>
+                <div class="service-body">
+                    <p class="service-desc">خدمة ترجمة احترافية للنصوص الأكاديمية مع الحفاظ على الدقة العلمية والمصطلحات المتخصصة</p>
+                    <div class="service-price">50 دينار</div>
+                    <button class="btn order-btn" data-service="الترجمة الأكاديمية">طلب الخدمة</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-form" id="orderForm" style="display: none;">
+            <h2 class="form-title">طلب خدمة: <span id="selectedService"></span></h2>
+            <form id="serviceForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">الاسم</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">اللقب</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workAddress">عنوان العمل</label>
+                    <input type="text" id="workAddress" name="workAddress" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">البريد الإلكتروني</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">رقم الهاتف</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="university">الجامعة</label>
+                        <input type="text" id="university" name="university" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialization">التخصص</label>
+                        <input type="text" id="specialization" name="specialization" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="details">تفاصيل الطلب (الموضوع، عدد الصفحات، الموعد النهائي، أي متطلبات خاصة)</label>
+                    <textarea id="details" name="details" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">إرسال الطلب</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2023 إنجاز البحوث والمذكرات. جميع الحقوق محفوظة.</p>
+            <div class="contact-info">
+                <a href="mailto:boufadinamohamedzakaria@gmail.com">
+                    <i class="fas fa-envelope"></i> boufadinamohamedzakaria@gmail.com
+                </a>
+                <a href="#">
+                    <i class="fas fa-link"></i> نموذج جوجل (Google Form)
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderButtons = document.querySelectorAll('.order-btn');
+            const orderForm = document.getElementById('orderForm');
+            const selectedServiceSpan = document.getElementById('selectedService');
+            const serviceForm = document.getElementById('serviceForm');
+            
+            orderButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const service = this.getAttribute('data-service');
+                    selectedServiceSpan.textContent = service;
+                    orderForm.style.display = 'block';
+                    
+                    // Scroll to the form
+                    orderForm.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+            
+            serviceForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Here you would normally send the form data to your server
+                // For demonstration, we'll just show an alert
+                
+                alert('شكراً لك! تم استلام طلبك بنجاح وسنتواصل معك قريباً.');
+                serviceForm.reset();
+                orderForm.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
