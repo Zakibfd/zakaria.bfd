@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>مساعدي الأكاديمي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/tabler-icons.min.css"/>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary:       #1a56db;
+  --primary-dark:  #1648c7;
+  --primary-light: #e8f0fe;
+  --accent:        #059669;
+  --accent-light:  #d1fae5;
+  --danger:        #dc2626;
+  --warn:          #d97706;
+  --warn-light:    #fef3c7;
+  --bg:            #f8fafc;
+  --surface:       #ffffff;
+  --border:        #e2e8f0;
+  --text:          #1e293b;
+  --text-muted:    #64748b;
+  --text-hint:     #94a3b8;
+  --radius:        10px;
+  --shadow:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:     0 4px 16px rgba(0,0,0,.10);
+}
+body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Top Bar ─────────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 60px;
+  box-shadow: var(--shadow);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 9px; display: grid; place-items: center; }
+.logo-icon i { color: #fff; font-size: 18px; }
+.logo-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.logo-sub  { font-size: 11px; color: var(--text-muted); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.credits-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--warn-light); border: 1px solid #fcd34d;
+  border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 600; color: var(--warn);
+  cursor: pointer;
+}
+.user-menu { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 10px; border-radius: 8px; transition: background .15s; }
+.user-menu:hover { background: var(--bg); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--primary); }
+
+/* ── Layout ──────────────────────────────────────── */
+.layout { display: flex; min-height: calc(100vh - 60px); }
+.sidebar {
+  width: 230px; flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 16px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.nav-section { font-size: 11px; color: var(--text-hint); text-transform: uppercase; letter-spacing: .07em; padding: 12px 10px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 14px; color: var(--text-muted); transition: all .15s;
+  position: relative;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.nav-item i { font-size: 18px; }
+.nav-badge { margin-right: auto; font-size: 11px; background: var(--primary); color: #fff; padding: 2px 7px; border-radius: 10px; }
+hr.nav-sep { border: none; border-top: 1px solid var(--border); margin: 8px 10px; }
+
+.content { flex: 1; padding: 28px; overflow-y: auto; max-width: 900px; }
+
+/* ── Page ────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+.page-header { margin-bottom: 24px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--text); }
+.page-desc  { font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.6; }
+
+/* ── Cards & Forms ───────────────────────────────── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+input, select, textarea {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'Cairo', sans-serif; font-size: 14px; color: var(--text);
+  background: var(--surface); outline: none; transition: border .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.1); }
+textarea { resize: vertical; min-height: 80px; line-height: 1.7; }
+
+/* ── Buttons ─────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-family: 'Cairo', sans-serif;
+  transition: all .15s;
+}
+.btn:hover { background: var(--bg); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-success:hover { background: #047857; }
+.btn-warn { background: var(--warn); color: #fff; border-color: var(--warn); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+/* ── AI Source Selector ──────────────────────────── */
+.src-row { display: flex; gap: 10px; margin-bottom: 18px; }
+.src-card {
+  flex: 1; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 10px; text-align: center; cursor: pointer; transition: all .15s;
+  background: var(--surface);
+}
+.src-card:hover { border-color: var(--primary); }
+.src-card.selected { border-color: var(--primary); background: var(--primary-light); }
+.src-card i { font-size: 22px; color: var(--text-muted); display: block; margin-bottom: 5px; }
+.src-card.selected i { color: var(--primary); }
+.src-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.src-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Output Box ──────────────────────────────────── */
+.output-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 20px; }
+.output-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--border);
+}
+.output-header span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.output-body {
+  padding: 16px; min-height: 120px; max-height: 450px; overflow-y: auto;
+  font-size: 14px; line-height: 1.9; color: var(--text); white-space: pre-wrap; direction: auto;
+}
+.output-body.empty { color: var(--text-hint); font-style: italic; }
+
+/* ── Pricing Cards ───────────────────────────────── */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.price-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; text-align: center;
+  box-shadow: var(--shadow); transition: all .2s; position: relative;
+}
+.price-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.price-card.featured { border: 2px solid var(--primary); }
+.featured-badge {
+  position: absolute; top: -12px; right: 50%; transform: translateX(50%);
+  background: var(--primary); color: #fff; font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 10px;
+}
+.price-icon { font-size: 30px; margin-bottom: 10px; }
+.price-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.price-amount { font-size: 28px; font-weight: 700; color: var(--primary); }
+.price-currency { font-size: 14px; color: var(--text-muted); }
+.price-credits { font-size: 12px; color: var(--text-muted); margin: 8px 0; }
+.price-features { text-align: right; font-size: 13px; margin: 12px 0; color: var(--text-muted); list-style: none; }
+.price-features li { padding: 3px 0; }
+.price-features li::before { content: '✓  '; color: var(--accent); font-weight: 700; }
+
+/* ── Info/Alert Boxes ────────────────────────────── */
+.info-box {
+  display: flex; gap: 10px; padding: 12px 14px; border-radius: 8px;
+  font-size: 13px; line-height: 1.6; margin-bottom: 14px;
+  background: var(--primary-light); color: var(--primary); border: 1px solid rgba(26,86,219,.2);
+}
+.warn-box {
+  display: flex; gap: 10px; padding: 12px 14px; border-radius: 8px;
+  font-size: 13px; line-height: 1.6; margin-bottom: 14px;
+  background: var(--warn-light); color: var(--warn); border: 1px solid #fcd34d;
+}
+.info-box i, .warn-box i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* ── Steps ───────────────────────────────────────── */
+.steps-row { display: flex; margin-bottom: 24px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.step-item {
+  flex: 1; padding: 10px 8px; text-align: center; font-size: 13px; font-weight: 500;
+  border-left: 1px solid var(--border); background: var(--bg); color: var(--text-hint);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.step-item:last-child { border-left: none; }
+.step-item.done   { background: var(--accent-light); color: var(--accent); }
+.step-item.active { background: var(--primary-light); color: var(--primary); }
+
+/* ── Auth Modal ──────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center; z-index: 500;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--surface); border-radius: 14px; padding: 32px;
+  width: 380px; max-width: 95vw; box-shadow: var(--shadow-md);
+}
+.modal-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.modal-sub   { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 24px; }
+.tab-row { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+.tab-btn { flex: 1; padding: 9px; font-size: 14px; font-weight: 600; font-family: 'Cairo', sans-serif; cursor: pointer; background: var(--bg); border: none; color: var(--text-muted); transition: all .15s; }
+.tab-btn.active { background: var(--primary); color: #fff; }
+
+/* ── History ─────────────────────────────────────── */
+.history-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px;
+  background: var(--surface); cursor: pointer; transition: all .15s;
+}
+.history-item:hover { border-color: var(--primary); background: var(--primary-light); }
+.history-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--primary-light); display: grid; place-items: center; flex-shrink: 0; }
+.history-icon i { color: var(--primary); font-size: 18px; }
+.history-title { font-size: 14px; font-weight: 600; }
+.history-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.history-actions { margin-right: auto; display: flex; gap: 6px; }
+
+/* ── Toast ───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff; border-radius: 10px;
+  padding: 12px 20px; font-size: 14px; z-index: 999;
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* ── Spinner ─────────────────────────────────────── */
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Toast ──────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Auth Modal ─────────────────────────────────── -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-title"><i class="ti ti-school" style="color:var(--primary)"></i> مساعدي الأكاديمي</div>
+    <div class="modal-sub">منصة البحوث والمذكرات الذكية</div>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">دخول</button>
+      <button class="tab-btn" id="tabReg" onclick="switchTab('register')">حساب جديد</button>
+    </div>
+    <div id="formLogin">
+      <div class="form-group" style="margin-bottom:12px">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="loginEmail" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group" style="margin-bottom:18px">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPwd" placeholder="••••••••"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">
+        <i class="ti ti-login"></i> دخول
+      </button>
+    </div>
+    <div id="formRegister" style="display:none">
+      <div class="form-group" style="margin-bottom:12px">
+        <label>الاسم الكامل</label>
+        <input type="text" id="regName" placeholder="الاسم واللقب"/>
+      </div>
+      <div class="form-group" style="margin-bottom:12px">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="regEmail" placeholder="email@example.com"/>
+      </div>
+      <div class="form-group" style="margin-bottom:18px">
+        <label>كلمة المرور</label>
+        <input type="password" id="regPwd" placeholder="••••••••"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRegister()">
+        <i class="ti ti-user-plus"></i> إنشاء الحساب
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Top Bar ─────────────────────────────────────── -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-school"></i></div>
+    <div>
+      <div class="logo-name">مساعدي الأكاديمي</div>
+      <div class="logo-sub">منصة ذكية للطلبة</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="credits-badge" onclick="showPage('pricing')">
+      <i class="ti ti-coins"></i>
+      <span id="creditsDisplay">0 رصيد</span>
+    </div>
+    <div class="user-menu" onclick="toggleUserMenu()">
+      <div class="avatar" id="avatarEl">؟</div>
+      <span id="userNameEl" style="font-size:14px;font-weight:600">—</span>
+      <i class="ti ti-chevron-down" style="font-size:14px;color:var(--text-muted)"></i>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Layout ─────────────────────────────────── -->
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-section">الخدمات</div>
+    <div class="nav-item active" onclick="showPage('research')"><i class="ti ti-book"></i> بحث علمي</div>
+    <div class="nav-item" onclick="showPage('memoir')"><i class="ti ti-file-description"></i> مذكرة تخرج</div>
+    <div class="nav-item" onclick="showPage('report')"><i class="ti ti-report"></i> تقرير</div>
+    <div class="nav-item" onclick="showPage('cv')"><i class="ti ti-id-badge-2"></i> سيرة ذاتية</div>
+    <hr class="nav-sep"/>
+    <div class="nav-section">الحساب</div>
+    <div class="nav-item" onclick="showPage('pricing')"><i class="ti ti-credit-card"></i> الاشتراك والدفع</div>
+    <div class="nav-item" onclick="showPage('history')"><i class="ti ti-history"></i> سجل الأعمال</div>
+    <div class="nav-item" onclick="showPage('send')"><i class="ti ti-mail"></i> إرسال بالبريد</div>
+    <hr class="nav-sep"/>
+    <div class="nav-item" onclick="doLogout()" style="color:var(--danger)"><i class="ti ti-logout"></i> خروج</div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── RESEARCH ── -->
+    <div class="page active" id="page-research">
+      <div class="page-header">
+        <div class="page-title">بحث علمي</div>
+        <div class="page-desc">توليد بحث أكاديمي كامل — يستهلك <strong>1 رصيد</strong></div>
+      </div>
+      <div class="card">
+        <div class="src-row">
+          <div class="src-card selected" id="src-claude" onclick="selectSrc('claude')">
+            <i class="ti ti-sparkles"></i><div class="src-name">Claude</div><div class="src-desc">Sonnet 4</div>
+          </div>
+          <div class="src-card" id="src-deepseek" onclick="selectSrc('deepseek')">
+            <i class="ti ti-robot"></i><div class="src-name">DeepSeek</div><div class="src-desc">Chat V3</div>
+          </div>
+          <div class="src-card" id="src-both" onclick="selectSrc('both')">
+            <i class="ti ti-arrows-exchange"></i><div class="src-name">الاثنان</div><div class="src-desc">مقارنة</div>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>عنوان البحث *</label><input id="res_title" placeholder="أدخل عنوان البحث..."/></div>
+          <div class="form-group"><label>التخصص</label>
+            <select id="res_domain">
+              <option>علوم الحاسوب</option><option>الإدارة والاقتصاد</option><option>العلوم الاجتماعية</option>
+              <option>الطب والصحة</option><option>القانون</option><option>الهندسة</option>
+              <option>الآداب واللغات</option><option>التربية والتعليم</option><option>أخرى</option>
+            </select>
+          </div>
+          <div class="form-group"><label>المستوى</label>
+            <select id="res_level"><option>بكالوريوس</option><option>ماستر</option><option>دكتوراه</option><option>تقني سامي</option></select>
+          </div>
+          <div class="form-group"><label>اللغة</label>
+            <select id="res_lang"><option value="ar">العربية</option><option value="fr">الفرنسية</option><option value="en">الإنجليزية</option></select>
+          </div>
+          <div class="form-group full"><label>تفاصيل إضافية</label><textarea id="res_desc" placeholder="الإشكالية، الأهداف، المنهجية المقترحة..."></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnResearch" onclick="generate('research')"><i class="ti ti-sparkles"></i> توليد البحث</button>
+          <button class="btn" onclick="clearOut('res')"><i class="ti ti-trash"></i> مسح</button>
+        </div>
+      </div>
+      <div class="output-wrap" id="res-out-wrap" style="display:none">
+        <div class="output-header">
+          <span><i class="ti ti-file-text"></i>&nbsp; البحث المُولَّد</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="copyOut('res')"><i class="ti ti-copy"></i> نسخ</button>
+            <button class="btn btn-sm btn-success" onclick="exportDocx('research')"><i class="ti ti-file-word"></i> Word</button>
+            <button class="btn btn-sm btn-primary" onclick="goSend('res')"><i class="ti ti-mail"></i> إرسال</button>
+          </div>
+        </div>
+        <div class="output-body empty" id="res-out">في انتظار التوليد...</div>
+      </div>
+    </div>
+
+    <!-- ── MEMOIR ── -->
+    <div class="page" id="page-memoir">
+      <div class="page-header">
+        <div class="page-title">مذكرة تخرج</div>
+        <div class="page-desc">هيكل ومحتوى مذكرة تخرج كاملة — يستهلك <strong>3 أرصدة</strong></div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group"><label>عنوان المذكرة *</label><input id="mem_title" placeholder="عنوان المذكرة..."/></div>
+          <div class="form-group"><label>اسم الطالب</label><input id="mem_student" placeholder="الاسم الكامل"/></div>
+          <div class="form-group"><label>المؤسسة التعليمية</label><input id="mem_univ" placeholder="جامعة..."/></div>
+          <div class="form-group"><label>السنة الجامعية</label><input id="mem_year" placeholder="2024-2025"/></div>
+          <div class="form-group"><label>التخصص</label><input id="mem_spec" placeholder="الشعبة والتخصص..."/></div>
+          <div class="form-group"><label>اسم المشرف</label><input id="mem_superv" placeholder="د. / أ."/></div>
+          <div class="form-group full"><label>إشكالية المذكرة *</label><textarea id="mem_problem" placeholder="ما المشكلة التي تعالجها هذه المذكرة؟"></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generate('memoir')"><i class="ti ti-sparkles"></i> توليد المذكرة</button>
+        </div>
+      </div>
+      <div class="output-wrap" id="mem-out-wrap" style="display:none">
+        <div class="output-header">
+          <span><i class="ti ti-file-description"></i>&nbsp; المذكرة المُولَّدة</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="copyOut('mem')"><i class="ti ti-copy"></i> نسخ</button>
+            <button class="btn btn-sm btn-success" onclick="exportDocx('memoir')"><i class="ti ti-file-word"></i> Word</button>
+          </div>
+        </div>
+        <div class="output-body empty" id="mem-out">في انتظار التوليد...</div>
+      </div>
+    </div>
+
+    <!-- ── REPORT ── -->
+    <div class="page" id="page-report">
+      <div class="page-header">
+        <div class="page-title">إعداد تقرير</div>
+        <div class="page-desc">تقارير أكاديمية ومهنية جاهزة — يستهلك <strong>1 رصيد</strong></div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group"><label>عنوان التقرير *</label><input id="rep_title" placeholder="موضوع التقرير..."/></div>
+          <div class="form-group"><label>نوع التقرير</label>
+            <select id="rep_type"><option>تقرير ميداني</option><option>تقرير تدريب</option><option>تقرير دراسي</option><option>تقرير علمي</option><option>تقرير مشروع</option></select>
+          </div>
+          <div class="form-group full"><label>المحاور الرئيسية</label><textarea id="rep_axes" placeholder="المحاور والنقاط الرئيسية..."></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generate('report')"><i class="ti ti-sparkles"></i> توليد التقرير</button>
+        </div>
+      </div>
+      <div class="output-wrap" id="rep-out-wrap" style="display:none">
+        <div class="output-header">
+          <span><i class="ti ti-report"></i>&nbsp; التقرير المُولَّد</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="copyOut('rep')"><i class="ti ti-copy"></i> نسخ</button>
+            <button class="btn btn-sm btn-success" onclick="exportDocx('report')"><i class="ti ti-file-word"></i> Word</button>
+          </div>
+        </div>
+        <div class="output-body empty" id="rep-out">في انتظار التوليد...</div>
+      </div>
+    </div>
+
+    <!-- ── CV ── -->
+    <div class="page" id="page-cv">
+      <div class="page-header">
+        <div class="page-title">سيرة ذاتية احترافية</div>
+        <div class="page-desc">سيرة مصاغة ومنظمة لسوق العمل — يستهلك <strong>1 رصيد</strong></div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group"><label>الاسم الكامل *</label><input id="cv_name" placeholder="الاسم واللقب"/></div>
+          <div class="form-group"><label>البريد الإلكتروني</label><input type="email" id="cv_email" placeholder="email@example.com"/></div>
+          <div class="form-group"><label>رقم الهاتف</label><input id="cv_phone" placeholder="+213 ..."/></div>
+          <div class="form-group"><label>المدينة</label><input id="cv_city" placeholder="ورقلة، الجزائر..."/></div>
+          <div class="form-group"><label>المنصب المستهدف *</label><input id="cv_job" placeholder="مثال: مهندس برمجيات"/></div>
+          <div class="form-group"><label>أعلى شهادة</label><input id="cv_degree" placeholder="ماستر - 2024"/></div>
+          <div class="form-group full"><label>الخبرات والمهارات</label><textarea id="cv_skills" placeholder="التقنيات، اللغات، المشاريع، الخبرات..."></textarea></div>
+          <div class="form-group"><label>لغة السيرة الذاتية</label>
+            <select id="cv_lang"><option value="ar">العربية</option><option value="fr">الفرنسية</option><option value="en">الإنجليزية</option></select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generate('cv')"><i class="ti ti-sparkles"></i> توليد السيرة</button>
+        </div>
+      </div>
+      <div class="output-wrap" id="cv-out-wrap" style="display:none">
+        <div class="output-header">
+          <span><i class="ti ti-id-badge-2"></i>&nbsp; السيرة الذاتية</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="copyOut('cv')"><i class="ti ti-copy"></i> نسخ</button>
+            <button class="btn btn-sm btn-success" onclick="exportDocx('cv')"><i class="ti ti-file-word"></i> Word</button>
+          </div>
+        </div>
+        <div class="output-body empty" id="cv-out">في انتظار التوليد...</div>
+      </div>
+    </div>
+
+    <!-- ── PRICING ── -->
+    <div class="page" id="page-pricing">
+      <div class="page-header">
+        <div class="page-title">الاشتراك والدفع</div>
+        <div class="page-desc">اختر الخدمة وادفع بأمان عبر Stripe. كل عملية دفع تضيف أرصدة لحسابك.</div>
+      </div>
+      <div class="warn-box"><i class="ti ti-coins"></i> رصيدك الحالي: <strong id="creditsInPricing">0 أرصدة</strong> — كل خدمة تستهلك رصيداً واحداً (المذكرة 3).</div>
+      <div class="pricing-grid" id="pricingGrid">
+        <!-- filled by JS -->
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="card-title"><i class="ti ti-shield-check" style="color:var(--accent)"></i> الدفع آمن 100%</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.8">
+          ✓ مدفوعات مشفرة عبر Stripe<br>
+          ✓ لا نحتفظ ببيانات بطاقتك<br>
+          ✓ الأرصدة لا تنتهي صلاحيتها<br>
+          ✓ دعم فني متاح 24/7
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY ── -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <div class="page-title">سجل الأعمال</div>
+        <div class="page-desc">جميع الأعمال التي أنشأتها سابقاً</div>
+      </div>
+      <div id="historyList"><div style="color:var(--text-hint);text-align:center;padding:40px">جارٍ التحميل...</div></div>
+    </div>
+
+    <!-- ── SEND ── -->
+    <div class="page" id="page-send">
+      <div class="page-header">
+        <div class="page-title">إرسال بالبريد الإلكتروني</div>
+        <div class="page-desc">إرسال العمل النهائي مباشرةً عبر Gmail</div>
+      </div>
+      <div class="steps-row">
+        <div class="step-item done"><i class="ti ti-sparkles"></i> توليد</div>
+        <div class="step-item done"><i class="ti ti-file-word"></i> تصدير</div>
+        <div class="step-item active"><i class="ti ti-mail"></i> إرسال</div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group"><label>إرسال إلى *</label><input type="email" id="send_to" placeholder="prof@univ.dz"/></div>
+          <div class="form-group"><label>نسخة إلى (CC)</label><input type="email" id="send_cc" placeholder="my_email@gmail.com"/></div>
+          <div class="form-group full"><label>الموضوع</label><input id="send_subject" placeholder="تسليم بحث: ..."/></div>
+          <div class="form-group full"><label>نص الرسالة</label><textarea id="send_body" style="min-height:110px"></textarea></div>
+          <div class="form-group full"><label>المحتوى كمرفق (اختياري)</label><textarea id="send_content" style="min-height:80px" placeholder="يُملأ تلقائياً من آخر عمل مُولَّد..."></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="sendEmail()"><i class="ti ti-send"></i> إرسال عبر الخادم</button>
+          <button class="btn" onclick="openGmail()"><i class="ti ti-brand-gmail"></i> فتح Gmail</button>
+          <button class="btn" onclick="autoFillEmail()"><i class="ti ti-wand"></i> ملء تلقائي</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+// ─── Config ──────────────────────────────────────────────────────────────────
+const API = 'http://localhost:4000/api';  // change to your production URL
+let token = localStorage.getItem('token') || null;
+let user  = null;
+let currentSrc = 'claude';
+let lastOutputs = {};
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  if (token) {
+    try {
+      const r = await apiFetch('/auth/me');
+      user = r;
+      onLogin();
+    } catch { token = null; localStorage.removeItem('token'); }
+  }
+  if (!token) document.getElementById('authModal').classList.remove('hidden');
+  await loadPrices();
+});
+
+// ─── Auth ──────────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  document.getElementById('tabLogin').classList.toggle('active', t === 'login');
+  document.getElementById('tabReg').classList.toggle('active', t === 'register');
+  document.getElementById('formLogin').style.display    = t === 'login' ? '' : 'none';
+  document.getElementById('formRegister').style.display = t === 'register' ? '' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPwd').value;
+  try {
+    const r = await apiFetch('/auth/login', 'POST', { email, password });
+    token = r.token; user = r.user;
+    localStorage.setItem('token', token);
+    onLogin();
+  } catch(e) { toast('خطأ: ' + e.message, true); }
+}
+
+async function doRegister() {
+  const name     = document.getElementById('regName').value;
+  const email    = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPwd').value;
+  try {
+    const r = await apiFetch('/auth/register', 'POST', { name, email, password });
+    token = r.token; user = r.user;
+    localStorage.setItem('token', token);
+    onLogin();
+  } catch(e) { toast('خطأ: ' + e.message, true); }
+}
+
+function onLogin() {
+  document.getElementById('authModal').classList.add('hidden');
+  updateCreditsUI();
+  document.getElementById('userNameEl').textContent = user.name;
+  document.getElementById('avatarEl').textContent   = user.name.charAt(0);
+}
+
+function doLogout() {
+  token = null; user = null;
+  localStorage.removeItem('token');
+  location.reload();
+}
+
+function toggleUserMenu() {}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + name);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+  if (name === 'history') loadHistory();
+  if (name === 'pricing') updatePricingCredits();
+}
+
+// ─── AI Source ────────────────────────────────────────────────────────────────
+function selectSrc(s) {
+  currentSrc = s;
+  ['claude','deepseek','both'].forEach(x => {
+    document.getElementById('src-' + x)?.classList.toggle('selected', x === s);
+  });
+}
+
+// ─── Generate ─────────────────────────────────────────────────────────────────
+const servicePrefix = { research: 'res', memoir: 'mem', report: 'rep', cv: 'cv' };
+
+async function generate(service) {
+  if (!token) { toast('سجّل دخولك أولاً', true); return; }
+  if (!user || user.credits < (service === 'memoir' ? 3 : 1)) {
+    toast('رصيدك غير كافٍ — يرجى الدفع أولاً', true);
+    showPage('pricing'); return;
+  }
+
+  const data = collectData(service);
+  if (!data) return;
+
+  const pfx = servicePrefix[service];
+  const outEl  = document.getElementById(pfx + '-out');
+  const wrapEl = document.getElementById(pfx + '-out-wrap');
+  wrapEl.style.display = '';
+  outEl.classList.remove('empty');
+  outEl.textContent = '⏳ جارٍ التوليد...';
+
+  try {
+    const response = await fetch(`${API}/ai/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ service, data, model: currentSrc }),
+    });
+
+    if (response.status === 402) {
+      const err = await response.json();
+      toast(err.error, true); showPage('pricing'); return;
+    }
+    if (!response.ok) { toast('فشل الاتصال بالخادم', true); return; }
+
+    const reader = response.body.getReader();
+    const dec    = new TextDecoder();
+    let fullText = '';
+    outEl.textContent = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const lines = dec.decode(value).split('\n');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const obj = JSON.parse(line.slice(6));
+          if (obj.text) { fullText += obj.text; outEl.textContent = fullText; outEl.scrollTop = outEl.scrollHeight; }
+          if (obj.done) { lastOutputs[service] = fullText; user.credits -= (service === 'memoir' ? 3 : 1); updateCreditsUI(); }
+          if (obj.error) toast(obj.error, true);
+        } catch {}
+      }
+    }
+  } catch (err) {
+    outEl.textContent = 'خطأ: ' + err.message;
+  }
+}
+
+function collectData(service) {
+  if (service === 'research') {
+    const title = document.getElementById('res_title').value.trim();
+    if (!title) { toast('أدخل عنوان البحث', true); return null; }
+    return { title, domain: document.getElementById('res_domain').value, level: document.getElementById('res_level').value, lang: document.getElementById('res_lang').value, description: document.getElementById('res_desc').value };
+  }
+  if (service === 'memoir') {
+    const title = document.getElementById('mem_title').value.trim();
+    if (!title) { toast('أدخل عنوان المذكرة', true); return null; }
+    return { title, student: document.getElementById('mem_student').value, university: document.getElementById('mem_univ').value, year: document.getElementById('mem_year').value, speciality: document.getElementById('mem_spec').value, supervisor: document.getElementById('mem_superv').value, problem: document.getElementById('mem_problem').value };
+  }
+  if (service === 'report') {
+    const title = document.getElementById('rep_title').value.trim();
+    if (!title) { toast('أدخل عنوان التقرير', true); return null; }
+    return { title, type: document.getElementById('rep_type').value, axes: document.getElementById('rep_axes').value };
+  }
+  if (service === 'cv') {
+    const name = document.getElementById('cv_name').value.trim();
+    if (!name) { toast('أدخل الاسم الكامل', true); return null; }
+    return { name, email: document.getElementById('cv_email').value, phone: document.getElementById('cv_phone').value, city: document.getElementById('cv_city').value, job: document.getElementById('cv_job').value, degree: document.getElementById('cv_degree').value, skills: document.getElementById('cv_skills').value, lang: document.getElementById('cv_lang').value };
+  }
+}
+
+// ─── Export DOCX ──────────────────────────────────────────────────────────────
+async function exportDocx(service) {
+  const content = lastOutputs[service];
+  if (!content) { toast('ولّد المحتوى أولاً', true); return; }
+  const pfx   = servicePrefix[service];
+  const titleEl = document.getElementById(pfx === 'res' ? 'res_title' : pfx === 'mem' ? 'mem_title' : pfx === 'rep' ? 'rep_title' : 'cv_name');
+  const title = titleEl?.value || service;
+  const typeLabels = { research: 'بحث علمي', memoir: 'مذكرة تخرج', report: 'تقرير', cv: 'سيرة ذاتية' };
+
+  try {
+    const response = await fetch(`${API}/document/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ title, content, docType: typeLabels[service] }),
+    });
+    if (!response.ok) { toast('فشل إنشاء الملف', true); return; }
+    const blob = await response.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = title + '.docx'; a.click();
+    URL.revokeObjectURL(url);
+    toast('تم تحميل الملف ✓');
+  } catch(e) { toast('خطأ: ' + e.message, true); }
+}
+
+// ─── Prices & Payment ─────────────────────────────────────────────────────────
+const priceIcons = { research: 'ti-book', memoir: 'ti-file-description', report: 'ti-report', cv: 'ti-id-badge-2' };
+
+async function loadPrices() {
+  try {
+    const prices = await apiFetch('/payment/prices');
+    const grid   = document.getElementById('pricingGrid');
+    grid.innerHTML = prices.map(p => `
+      <div class="price-card ${p.service === 'memoir' ? 'featured' : ''}">
+        ${p.service === 'memoir' ? '<div class="featured-badge">الأشمل</div>' : ''}
+        <div class="price-icon"><i class="ti ${priceIcons[p.service] || 'ti-file'}"></i></div>
+        <div class="price-name">${p.name_ar}</div>
+        <div class="price-amount">${(p.price / 100).toLocaleString('ar-DZ')}<span class="price-currency"> د.ج</span></div>
+        <div class="price-credits">يستهلك ${p.credits} رصيد</div>
+        <ul class="price-features">
+          <li>توليد فوري بالذكاء الاصطناعي</li>
+          <li>تصدير Word جاهز للطباعة</li>
+          <li>إرسال مباشر بالبريد</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="startPayment('${p.service}')">
+          <i class="ti ti-credit-card"></i> ادفع الآن
+        </button>
+      </div>
+    `).join('');
+  } catch(e) { console.log('prices load error', e); }
+}
+
+function updatePricingCredits() {
+  document.getElementById('creditsInPricing').textContent = (user?.credits || 0) + ' أرصدة';
+}
+
+async function startPayment(service) {
+  if (!token) { toast('سجّل دخولك أولاً', true); return; }
+  try {
+    toast('جارٍ إعداد الدفع...');
+    const r = await apiFetch('/payment/checkout', 'POST', { service });
+    if (r.url) window.location.href = r.url;
+  } catch(e) { toast('فشل الدفع: ' + e.message, true); }
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+const serviceLabels = { research: 'بحث علمي', memoir: 'مذكرة تخرج', report: 'تقرير', cv: 'سيرة ذاتية' };
+
+async function loadHistory() {
+  const list = document.getElementById('historyList');
+  try {
+    const rows = await apiFetch('/ai/history');
+    if (!rows.length) { list.innerHTML = '<div style="color:var(--text-hint);text-align:center;padding:40px">لا يوجد سجل بعد</div>'; return; }
+    list.innerHTML = rows.map(r => `
+      <div class="history-item" onclick="viewGeneration('${r.id}')">
+        <div class="history-icon"><i class="ti ${priceIcons[r.service] || 'ti-file'}"></i></div>
+        <div>
+          <div class="history-title">${r.title || serviceLabels[r.service]}</div>
+          <div class="history-meta">${serviceLabels[r.service]} · ${r.model} · ${new Date(r.created_at).toLocaleDateString('ar-DZ')}</div>
+        </div>
+        <div class="history-actions">
+          <button class="btn btn-sm btn-success" onclick="event.stopPropagation();reExportDocx('${r.id}','${r.service}')"><i class="ti ti-file-word"></i></button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { list.innerHTML = '<div style="color:var(--danger);padding:20px">خطأ في التحميل</div>'; }
+}
+
+async function viewGeneration(id) {
+  try {
+    const row = await apiFetch('/ai/generation/' + id);
+    lastOutputs[row.service] = row.content;
+    showPage(row.service);
+    const pfx   = servicePrefix[row.service];
+    const outEl = document.getElementById(pfx + '-out');
+    const wrap  = document.getElementById(pfx + '-out-wrap');
+    if (outEl) { outEl.textContent = row.content; outEl.classList.remove('empty'); wrap.style.display = ''; }
+  } catch(e) { toast('خطأ: ' + e.message, true); }
+}
+
+async function reExportDocx(genId, service) {
+  try {
+    const response = await fetch(`${API}/document/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ genId, docType: serviceLabels[service] }),
+    });
+    const blob = await response.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = service + '.docx'; a.click();
+    URL.revokeObjectURL(url);
+    toast('تم التحميل ✓');
+  } catch(e) { toast('خطأ', true); }
+}
+
+// ─── Email ────────────────────────────────────────────────────────────────────
+function goSend(pfx) {
+  const svc = Object.keys(servicePrefix).find(k => servicePrefix[k] === pfx);
+  if (svc && lastOutputs[svc]) document.getElementById('send_content').value = lastOutputs[svc];
+  showPage('send');
+}
+
+async function sendEmail() {
+  const to = document.getElementById('send_to').value.trim();
+  if (!to) { toast('أدخل بريد المرسَل إليه', true); return; }
+  try {
+    await apiFetch('/email/send', 'POST', {
+      to, cc: document.getElementById('send_cc').value,
+      subject: document.getElementById('send_subject').value,
+      body: document.getElementById('send_body').value,
+      content: document.getElementById('send_content').value,
+      filename: 'عمل_أكاديمي.txt',
+    });
+    toast('تم الإرسال بنجاح ✓');
+  } catch(e) { toast('فشل الإرسال: ' + e.message, true); }
+}
+
+function openGmail() {
+  const to = encodeURIComponent(document.getElementById('send_to').value);
+  const cc = document.getElementById('send_cc').value ? '&cc=' + encodeURIComponent(document.getElementById('send_cc').value) : '';
+  const su = encodeURIComponent(document.getElementById('send_subject').value || 'تسليم عمل أكاديمي');
+  const bd = encodeURIComponent(document.getElementById('send_body').value || '');
+  window.open(`https://mail.google.com/mail/?view=cm&to=${to}${cc}&su=${su}&body=${bd}`, '_blank');
+}
+
+function autoFillEmail() {
+  if (!document.getElementById('send_subject').value)
+    document.getElementById('send_subject').value = 'تسليم عمل أكاديمي — ' + new Date().getFullYear();
+  if (!document.getElementById('send_body').value)
+    document.getElementById('send_body').value = 'السلام عليكم ورحمة الله وبركاته،\n\nيشرفني أن أرفق إليكم عملي الأكاديمي المُعدّ.\n\nأرجو أن يحوز على رضاكم.\n\nتفضلوا بقبول فائق الاحترام.';
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+async function apiFetch(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body)  opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const json = await r.json();
+  if (!r.ok) throw new Error(json.error || r.statusText);
+  return json;
+}
+
+function updateCreditsUI() {
+  const c = user?.credits ?? 0;
+  document.getElementById('creditsDisplay').textContent = c + ' رصيد';
+}
+
+function clearOut(pfx) {
+  const el   = document.getElementById(pfx + '-out');
+  const wrap = document.getElementById(pfx + '-out-wrap');
+  if (el) { el.textContent = 'في انتظار التوليد...'; el.classList.add('empty'); }
+  if (wrap) wrap.style.display = 'none';
+}
+
+function copyOut(pfx) {
+  const text = document.getElementById(pfx + '-out')?.textContent;
+  if (text) { navigator.clipboard.writeText(text).catch(() => {}); toast('تم النسخ ✓'); }
+}
+
+let toastTimer;
+function toast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = isError ? 'var(--danger)' : 'var(--text)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Check for success redirect
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('order')) {
+  setTimeout(() => { toast('تم الدفع بنجاح! جارٍ تحديث رصيدك...'); apiFetch('/auth/me').then(u => { user = u; updateCreditsUI(); }); }, 1000);
+}
+</script>
+</body>
+</html>
